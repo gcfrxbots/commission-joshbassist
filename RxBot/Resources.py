@@ -176,7 +176,8 @@ def resetStartAgain():
 
 
 def adjustCoords(point):
-    x = point[0] - 1920
+    #x = point[0] - 1920
+    x = point[0]
     y = point[1]
     return x, y
 

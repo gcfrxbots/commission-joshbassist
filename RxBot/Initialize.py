@@ -1,9 +1,4 @@
 from Settings import *
-from subprocess import call
-import urllib, urllib.request
-import json
-import socket
-import pyperclip
 import os
 import datetime
 try:

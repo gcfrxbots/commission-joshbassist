@@ -3,19 +3,11 @@ from Initialize import *
 import pyautogui
 import mss
 import mss.tools
-#import pytesseract
 from PIL import Image, ImageOps
 import cv2
 import numpy
-from xlutils.copy import copy
-import xlrd
-import re
-import pygsheets
 #pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 pyautogui.FAILSAFE = False  # Might cause nuclear apocalypse
-from PIL import ImageGrab
-from functools import partial
-ImageGrab.grab = partial(ImageGrab.grab, all_screens=True)
 
 res = settings["RESOLUTION MODIFIER"] / 100
 

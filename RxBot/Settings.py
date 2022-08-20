@@ -6,7 +6,6 @@ import sys
 try:
     import xlrd
     import xlsxwriter
-    from discord import Webhook, RequestsWebhookAdapter
 except ImportError as e:
     print(e)
     raise ImportError(">>> One or more required packages are not properly installed! Run INSTALL_REQUIREMENTS.bat to fix!")

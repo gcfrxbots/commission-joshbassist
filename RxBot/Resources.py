@@ -6,6 +6,7 @@ import mss.tools
 from PIL import Image, ImageOps
 import cv2
 import numpy
+import pyperclip
 #pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 pyautogui.FAILSAFE = False  # Might cause nuclear apocalypse
 
@@ -232,26 +233,20 @@ def startRequest():
     time.sleep(0.4)
 
 
-    dataOnScreen = pyautogui.locateAllOnScreen('Resources/lottoListing.png', confidence=0.9)
-
-    if not list(dataOnScreen):
+    if not pyautogui.locateOnScreen('Resources/lottoListing.png', confidence=0.9):
         print("Lottery is likely over. Waiting a few seconds then trying again...")
         time.sleep(10)
         resetStartAgain()
         return
 
-    for position in enumerate(dataOnScreen):
-        count = position[0]
-        position = position[1]
+    for position in pyautogui.locateAllOnScreen('Resources/lottoListing.png', confidence=0.9):
         scrollFurther = False
         # TODO REMOVE THIS ITS JUST FOR TESTING
         point = adjustCoords(pyautogui.center(position))
         curUsername = getUsername(point)
 
 
-
         print("Checking %s" % curUsername.replace("\n", ""))
-        print(count)
 
         if curUsername in hitlistBlacklist:
             print("User is blacklisted, skipping.")

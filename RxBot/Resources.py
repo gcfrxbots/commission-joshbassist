@@ -274,13 +274,16 @@ def startRequest():
         for position in pyautogui.locateAllOnScreen('Resources/pimpin.png', confidence=0.9, grayscale=True):  # TODO ADD A REGION
             buttonLocations.append(adjustCoords(pyautogui.center(position)))  # Fill the buttonLocations list, index 0 should be player 0. Should be done after every attack to make sure locations are correct.
 
+        if not buttonLocations:
+            print("Error finding buttons. Please update pimpin.png in Resources.")
+
 
         index = playerData[player] + killCount
         # print(index)
         location = buttonLocations[index]
-        print(location)
+        #print(location)
         # print(playerData)
-        print(buttonLocations)
+        #print(buttonLocations)
 
         #print(location)
         print("Attacking %s, index %s" % (player, index))

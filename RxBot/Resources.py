@@ -213,6 +213,7 @@ def getUsername(point):
     return data
 
 
+
 hitlistBlacklist = []
 
 
@@ -253,6 +254,7 @@ def startRequest():
     if not playerData:  # Check if lotto not active
         print("Lotto likely not active (No (Lotto Listing) text found) or no valid users available, waiting 5s then trying again...")
         time.sleep(5)
+        bankCash()
         resetStartAgain()
         return
     # ----------------------------------------------- DONE FILTERING FROM SITE, START LOOP
@@ -326,11 +328,36 @@ def lookForPopups():
         time.sleep(0.3)
         return True
 
+    return checkCiao()
+
+def checkCiao():
+    ciaoLocation = resources.findImageOnScreen("ciaoExp.png", 0.85)
+    if ciaoLocation:
+        pyautogui.click(pyautogui.center(ciaoLocation))
+        time.sleep(0.3)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("ciaoConfirm.png", 0.85)))
+        time.sleep(1)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("close.png", 0.85)))
+        time.sleep(0.5)
+        gotoTab("hospital")  # Heal after you CIAO
+        time.sleep(0.2)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("heal.png", 0.85)))
+        time.sleep(0.4)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("closeHeal.png", 0.85)))
+        time.sleep(0.4)
+        return True
     return False
 
-
-
-
+def bankCash():
+    if not resources.findImageOnScreen("cash0.png", 0.95):
+        print("Banking cash!")
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("cash.png", 0.95)))
+        time.sleep(0.3)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("bankYes.png", 0.85)))
+        time.sleep(1)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("close.png", 0.85)))
+        time.sleep(1)
+        return
 
 
 resources = resources()

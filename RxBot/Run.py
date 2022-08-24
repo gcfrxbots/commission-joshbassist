@@ -10,17 +10,17 @@ def main():
     time.sleep(5)
     resetStartAgain()
     while True:
-        # try:
-        startRequest()
+        try:
+            startRequest()
 
-        # except IndexError:
-        #     print("Reached end of screen, refreshing!")
-        #     resetStartAgain()
-        #
-        # except Exception as e:
-        #     print("Error detected - Trying again.")
-        #     print(e)
-        #     resetStartAgain()
+        except IndexError:
+            print("Reached end of screen, refreshing!")
+            resetStartAgain()
+
+        except Exception as e:
+            print("Error detected - Trying again.")
+            print(e)
+            resetStartAgain()
 
 
 def tick():

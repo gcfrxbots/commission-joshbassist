@@ -13,6 +13,10 @@ def main():
         try:
             startRequest()
 
+        except IndexError:
+            print("Reached end of screen, refreshing!")
+            resetStartAgain()
+
         except Exception as e:
             print("Error detected - Trying again.")
             print(e)

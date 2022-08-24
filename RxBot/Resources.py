@@ -17,8 +17,6 @@ scrollToMoveUpOneBarDistance = -54
 timesToScrollUp = 8
 portraitOffset = -40
 
-global scrollFurther
-scrollFurther = False
 
 def cvToPil(cvImg):
     cvImg = cv2.cvtColor(cvImg, cv2.COLOR_BGR2RGB)
@@ -54,7 +52,7 @@ class resources:
         pyautogui.keyUp(key)
 
     def findImageOnScreen(self, imgName, confidence):
-        imageLocation = pyautogui.locateOnScreen("Resources/%s" % imgName, confidence=confidence)
+        imageLocation = pyautogui.locateOnScreen("Resources/%s" % imgName, confidence=confidence, grayscale=True)
         if not imageLocation:
             return False
         #print("Image found at " + str(imageLocation))
@@ -62,7 +60,7 @@ class resources:
 
     def moveMouseToLocation(self, imageLocation):
         x, y = pyautogui.center(imageLocation)
-        pyautogui.moveTo(x, y, 0.2)
+        pyautogui.moveTo(x, y)
 
     # def imgToText(self, img):
     #     text = pytesseract.image_to_string(img, config='--psm 10 --oem 3').replace("-", "")
@@ -160,27 +158,28 @@ class resources:
 
 
 def resetStartAgain():
-    pyautogui.hotkey('f5')
-    time.sleep(0.4)
-    pyautogui.hotkey('enter')
-    time.sleep(2)
+    pyautogui.scroll(1000)
     gotoTab("hitlist")
-    print("Refreshed and reset to Hitlist tab")
+    pyautogui.click(pyautogui.center(resources.findImageOnScreen("refresh.png", 0.85)))
+    time.sleep(0.5)
+    print("Refreshed")
 
 
 def adjustCoords(point):
-    #x = point[0] - 1920
-    x = point[0]
+    x = point[0] - 1920
+    #x = point[0]
+    x = x + 300
     y = point[1]
     return x, y
 
 
 def gotoTab(tab):  # tab.png
     tab = tab.lower()
-    if resources.findImageOnScreen("%s.png" % tab, 0.8):
-        resources.moveMouseToLocation(resources.findImageOnScreen("%s.png" % tab, 0.8))
+    location = pyautogui.locateOnScreen("Resources/%s.png" % tab, confidence=0.8)
+    if location:
+        resources.moveMouseToLocation(location)
         pyautogui.click()
-    time.sleep(0.2)
+        time.sleep(0.2)
 
 
 def stringToInt(string):
@@ -220,75 +219,116 @@ hitlistBlacklist = []
 
 
 def startRequest():
-    global scrollFurther
-    #gotoTab('hitlist')
+    scrollFurther = False
+    killCount = 0
 
-    count = 0
-
-    pyautogui.scroll(1000)
-    pyautogui.scroll(-385)
+    # -------------------------------------------- START DATA FILTERING FROM SITE
+    pyautogui.hotkey('ctrl', 'a')
     time.sleep(0.2)
-    if scrollFurther:
-        pyautogui.scroll(-385)
-    time.sleep(0.4)
+    pyautogui.hotkey('ctrl', 'c')
+    time.sleep(0.3)
+    data = pyperclip.paste()
+
+    # Split data up
+    playerData = {}
+
+    data = data.split("When")[1:]
+    data = "".join(data)
+    for i in enumerate(data.split("minutes")):
+        count = i[0]
+        i = i[1]
+        userInfo = i.split("\n")
+        del userInfo[0]
+        #print(userInfo)
+        if "Lotto Listing" in userInfo[0]:
+            username = userInfo[1].replace("\r", "")
+            bounty = userInfo[2].split("$")[1]
+            bounty = stringToInt(bounty.split("MEGA")[0].replace(",", ""))
+
+            if bounty <= settings["MAX BOUNTY"]:
+                playerData[username] = count
+                print("Added target %s | $%s" % (username, str(bounty)))
 
 
-    if not pyautogui.locateOnScreen('Resources/lottoListing.png', confidence=0.9):
-        print("Lottery is likely over. Waiting a few seconds then trying again...")
-        time.sleep(10)
+    if not playerData:  # Check if lotto not active
+        print("Lotto likely not active (No (Lotto Listing) text found) or no valid users available, waiting 5s then trying again...")
+        time.sleep(5)
         resetStartAgain()
         return
+    # ----------------------------------------------- DONE FILTERING FROM SITE, START LOOP
 
-    for position in pyautogui.locateAllOnScreen('Resources/lottoListing.png', confidence=0.9):
-        scrollFurther = False
-        # TODO REMOVE THIS ITS JUST FOR TESTING
-        point = adjustCoords(pyautogui.center(position))
-        curUsername = getUsername(point)
+    for player in playerData:
+        buttonLocations = []
+        pyautogui.scroll(1000)
+        pyautogui.hotkey('ctrl', 'a')
+        time.sleep(0.1)
+        pyautogui.scroll(-365)
+        time.sleep(0.1)
+        if scrollFurther:
+            pyautogui.scroll(-385)
+        time.sleep(0.4)
 
-
-        print("Checking %s" % curUsername.replace("\n", ""))
-
-        if curUsername in hitlistBlacklist:
-            print("User is blacklisted, skipping.")
-        else:
-            time.sleep(0.1)
-            curBounty = getBounty(point)
-            if curBounty > settings["MAX BOUNTY"]:
-                print("Bounty too high!")
-                hitlistBlacklist.append(curUsername)
-
-            else:
-
-                time.sleep(0.2)
-                print("Bounty low enough... attacking!")
-                # Store the username to easily find it again
-
-                pyautogui.moveTo(point[0] + 600, point[1])
-                pyautogui.click()
-                time.sleep(0.4)
-
-                # Determine if lost or not by looking for the you lose
-                if resources.findImageOnScreen("attackAgain.png", 0.85):
-                    print("Won! Attacking again...")
-
-                    while resources.findImageOnScreen("attackAgain.png", 0.85):
-                        resources.moveMouseToLocation(resources.findImageOnScreen("attackAgain.png", 0.85))
-                        pyautogui.click()
-                        time.sleep(0.2)
-
-                    print("Can't attack again anymore, resetting.")
-                    scrollFurther = True
-                    hitlistBlacklist.append(curUsername)
-                    return
+        for position in pyautogui.locateAllOnScreen('Resources/pimpin.png', confidence=0.9, grayscale=True):  # TODO ADD A REGION
+            buttonLocations.append(adjustCoords(pyautogui.center(position)))  # Fill the buttonLocations list, index 0 should be player 0. Should be done after every attack to make sure locations are correct.
 
 
-                else:
-                    scrollFurther = True
-                    hitlistBlacklist.append(curUsername)  # Lost! Move onto the next person and try again.
-                    return
+        index = playerData[player] + killCount
+        # print(index)
+        location = buttonLocations[index]
+        print(location)
+        # print(playerData)
+        print(buttonLocations)
+
+        #print(location)
+        print("Attacking %s, index %s" % (player, index))
+        time.sleep(0.2)
+        pyautogui.click(location[0], location[1])  # Click the attack button
+
+        # Determine if lost or not by looking for the you lose
+        if not resources.findImageOnScreen("loser.png", 0.9):  # Skip the "keep attacking" loop if you lose and just go to the next player
+
+            while True:
+                location = pyautogui.locateOnScreen("Resources/attackAgain.png", confidence=0.85, grayscale=True)  # TODO ADD A REGION
+                if not location:
+                    break
+                for x in range(5):
+                    pyautogui.click(pyautogui.center(location))
+                    time.sleep(0.1)
+
+
+            scrollFurther = True
+            if lookForPopups():  # Run after the Attack Again button isn't visible anymore
+                resetStartAgain()
+                scrollFurther = False
+                return  # If the popup manager did something (like heal or stamina), refresh the page and fully start again.
+
+        killCount += 1
+
 
     print("End of list!")
     resetStartAgain()
+    return
+
+def lookForPopups():
+
+    if resources.findImageOnScreen("getHealed.png", 0.85):
+        gotoTab("hospital")
+        time.sleep(0.2)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("heal.png", 0.85)))
+        time.sleep(0.4)
+        pyautogui.click(pyautogui.center(resources.findImageOnScreen("closeHeal.png", 0.85)))
+        time.sleep(0.4)
+        return True
+
+    staminaLocation = resources.findImageOnScreen("staminaRefill.png", 0.85)
+    if staminaLocation:
+        pyautogui.click(pyautogui.center(staminaLocation))
+        time.sleep(0.3)
+        return True
+
+    return False
+
+
 
 
 

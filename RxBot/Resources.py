@@ -255,6 +255,7 @@ def startRequest():
         print("Lotto likely not active (No (Lotto Listing) text found) or no valid users available, waiting 5s then trying again...")
         time.sleep(5)
         bankCash()
+        checkCiao()
         resetStartAgain()
         return
     # ----------------------------------------------- DONE FILTERING FROM SITE, START LOOP
@@ -331,7 +332,7 @@ def lookForPopups():
     return checkCiao()
 
 def checkCiao():
-    ciaoLocation = resources.findImageOnScreen("ciaoExp.png", 0.85)
+    ciaoLocation = pyautogui.locateOnScreen("Resources/ciaoExp.png", confidence=0.8)
     if ciaoLocation:
         pyautogui.click(pyautogui.center(ciaoLocation))
         time.sleep(0.3)

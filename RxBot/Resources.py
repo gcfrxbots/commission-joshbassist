@@ -166,8 +166,8 @@ def resetStartAgain():
 
 
 def adjustCoords(point):
-    x = point[0] - 1920
-    #x = point[0]
+    #x = point[0] - 1920
+    x = point[0]
     x = x + 300
     y = point[1]
     return x, y
@@ -271,7 +271,7 @@ def startRequest():
             pyautogui.scroll(-385)
         time.sleep(0.4)
 
-        for position in pyautogui.locateAllOnScreen('Resources/pimpin.png', confidence=0.9, grayscale=True):  # TODO ADD A REGION
+        for position in pyautogui.locateAllOnScreen('Resources/pimpin.png', confidence=0.86, grayscale=True):  # TODO ADD A REGION
             buttonLocations.append(adjustCoords(pyautogui.center(position)))  # Fill the buttonLocations list, index 0 should be player 0. Should be done after every attack to make sure locations are correct.
 
         if not buttonLocations:
@@ -288,6 +288,7 @@ def startRequest():
         #print(location)
         print("Attacking %s, index %s" % (player, index))
         time.sleep(0.2)
+        pyautogui.moveTo()
         pyautogui.click(location[0], location[1])  # Click the attack button
 
         # Determine if lost or not by looking for the you lose
@@ -335,7 +336,7 @@ def lookForPopups():
     return checkCiao()
 
 def checkCiao():
-    ciaoLocation = pyautogui.locateOnScreen("Resources/ciaoExp.png", confidence=0.8)
+    ciaoLocation = pyautogui.locateOnScreen("Resources/ciaoExp.png", confidence=0.9)
     if ciaoLocation:
         pyautogui.click(pyautogui.center(ciaoLocation))
         time.sleep(0.3)
@@ -351,6 +352,7 @@ def checkCiao():
         time.sleep(0.4)
         return True
     return False
+
 
 def bankCash():
     if not resources.findImageOnScreen("cash0.png", 0.95):
